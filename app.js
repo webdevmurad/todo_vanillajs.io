@@ -11,6 +11,8 @@ todoList.addEventListener('click', deleteCheck);
 // распределение заметок в зависимости от выбора option
 filterOption.addEventListener('click', filterTodo);
 
+document.addEventListener('DOMContentLoaded', getTodos);
+
 function addTodo(event) {
     event.preventDefault();
     // todo div
@@ -21,6 +23,9 @@ function addTodo(event) {
     newTodo.innerText = todoInput.value;
     newTodo.classList.add('todo-item');
     todoDiv.appendChild(newTodo);
+    // Добавляем заметку в localstorage
+    saveLocalStorage(todoInput.value);
+
     // Кнопка галочки
     const completedButton = document.createElement('button');
     completedButton.innerHTML = '<i class="fas fa-check"></i>';
@@ -35,8 +40,7 @@ function addTodo(event) {
     todoList.appendChild(todoDiv);
     // Очистить value input
     todoInput.value = '';
-    const todos = todoList.childNodes;
-    console.log(todos)
+    
 }
 
 function deleteCheck(e) {
@@ -46,6 +50,7 @@ function deleteCheck(e) {
     if (item.classList[0] === 'trash-btn') {
         const todo = item.parentElement;
         todo.classList.add('fall');
+        removeLovalTodos(todo);
         todo.addEventListener('transitionend', function() {
             todo.remove();
         });
@@ -83,4 +88,63 @@ function filterTodo(e) {
                 break;
         }
     })
+}
+
+function saveLocalStorage(todo) {
+    let todos;
+    if(localStorage.getItem('todos') === null) {
+        todos = [];
+    } else {
+        todos = JSON.parse(localStorage.getItem('todos'));
+    }
+
+    todos.push(todo);
+    localStorage.setItem('todos', JSON.stringify(todos));
+}
+
+function getTodos() {
+    let todos;
+    if(localStorage.getItem('todos') === null) {
+        todos = [];
+    } else {
+        todos = JSON.parse(localStorage.getItem('todos'));
+    }
+
+    todos.forEach(function(todo) {
+         // todo div
+        const todoDiv = document.createElement('div');
+        todoDiv.classList.add('todo');
+        // Создаем li
+        const newTodo = document.createElement('li');
+        newTodo.innerText = todo;
+        newTodo.classList.add('todo-item');
+        todoDiv.appendChild(newTodo);
+
+        // Кнопка галочки
+        const completedButton = document.createElement('button');
+        completedButton.innerHTML = '<i class="fas fa-check"></i>';
+        completedButton.classList.add('complete-btn');
+        todoDiv.appendChild(completedButton);
+        // Кнопка удаления
+        const trashButton = document.createElement('button');
+        trashButton.innerHTML = '<i class="fas fa-trash"></i>';
+        trashButton.classList.add('trash-btn');
+        todoDiv.appendChild(trashButton);
+        // Добавить в список
+        todoList.appendChild(todoDiv);
+    })
+}
+
+function removeLovalTodos(todo) {
+    let todos;
+
+    if (localStorage.getItem('todos') === null) {
+        todos = [];
+    } else {
+        todos = JSON.parse(localStorage.getItem('todos'));
+    }
+
+    const todoIndex = todo.children[0].innerText;
+    todos.splice(todos.indexOf(todoIndex), 1);
+    localStorage.setItem('todos', JSON.stringify(todos));
 }
